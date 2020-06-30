@@ -8,6 +8,8 @@ public class Rocket : MonoBehaviour
     bool right = false; //Movement condition to ensure there isn't a prioritised direction when both arrow (left & right) keys are down at once
     Rigidbody rb;
     AudioSource audioSource;
+    [SerializeField] float rotationSpeed = 250f; //Rotation speed (250f original)    
+    [SerializeField] float mainThrust = 10f; //Rotation speed (10f original) 
 
 
     // Start is called before the first frame update
@@ -31,7 +33,7 @@ public class Rocket : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Space))  //Boosting
         {
-            rb.AddRelativeForce(Vector3.up);
+            rb.AddRelativeForce(Vector3.up * mainThrust);
             if (!audioSource.isPlaying) //So the audio doesn't layer itself
             {
                 audioSource.volume = 1.0f;
@@ -47,35 +49,46 @@ public class Rocket : MonoBehaviour
 
     //Rocket movement buttons
     private void Rotate()
-    {
-        if (Input.GetKey(KeyCode.RightArrow) && !Input.GetKey(KeyCode.LeftArrow))  //Just right
+    {        
+        float rotationThisFrame = rotationSpeed * Time.deltaTime;   //DeltaTime added to the rotation speed
+
+        if (Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.LeftArrow))    //Both right and left
         {
-            right = true;
-            transform.Rotate(Vector3.back);
-        }
-        else if (!Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.LeftArrow))  //Just left
-        {
-            right = false;
-            transform.Rotate(Vector3.forward);
-        }
-        else if (Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.LeftArrow))    //Both right and left
-        {
+            rb.angularVelocity = Vector3.zero;  //Stops collision rotation 
             if (right)  //Checks bool of first arrow pressed
             {
-                transform.Rotate(Vector3.back);
+                transform.Rotate(Vector3.back * rotationThisFrame);
             }
             else
             {
-                transform.Rotate(Vector3.forward);
+                transform.Rotate(Vector3.forward * rotationThisFrame);
             }
         }
+        else if (Input.GetKey(KeyCode.RightArrow))  //Just right
+        {
+            rb.angularVelocity = Vector3.zero;  //Stops collision rotation 
+            right = true;
+            transform.Rotate(Vector3.back * rotationThisFrame);
+        }
+        else if (Input.GetKey(KeyCode.LeftArrow))  //Just left
+        {
+            rb.angularVelocity = Vector3.zero;  //Stops collision rotation 
+            right = false;
+            transform.Rotate(Vector3.forward * rotationThisFrame);
+        }        
     }
 
-
-    //Stops angular velocity from collisions messing with the rotation movement forever after
-    private void OnCollisionExit(Collision collision)
+    private void OnCollisionEnter(Collision collision)
     {
-        rb.angularVelocity = Vector3.zero;        
+        switch (collision.gameObject.tag)
+        {
+            case "Friendly":
+                print("ok");
+                break;
+            default:
+                print("dead");
+                break;
+        }
     }
 
     //Stops the y rotation from changing on collisions (even though the rb rotation contraint has been set)
