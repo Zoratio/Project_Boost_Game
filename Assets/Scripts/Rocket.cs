@@ -2,53 +2,88 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Rocket : MonoBehaviour
 {
     bool right = false; //Movement condition to ensure there isn't a prioritised direction when both arrow (left & right) keys are down at once
     Rigidbody rb;
-    AudioSource audioSource;
+    AudioSource audioSourceEngine;
+    AudioSource audioSourceSuccess;
+    AudioSource audioSourceDeath;
+
+
     [SerializeField] float rotationSpeed = 250f; //Rotation speed (250f original)    
     [SerializeField] float mainThrust = 10f; //Rotation speed (10f original) 
+    [SerializeField] AudioClip mainEngine;
+    [SerializeField] AudioClip success;
+    [SerializeField] AudioClip death; 
 
+
+    enum State { Alive, Dying, Transcending }
+    State state = State.Alive;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        audioSource = GetComponent<AudioSource>();
+        //--audio sources needed:
+        audioSourceEngine = gameObject.AddComponent<AudioSource>();
+        audioSourceEngine.clip = mainEngine;
+        audioSourceSuccess = gameObject.AddComponent<AudioSource>();
+        audioSourceSuccess.clip = success;
+        audioSourceSuccess.volume = 0.3f;
+        audioSourceDeath = gameObject.AddComponent<AudioSource>();
+        audioSourceDeath.clip = death;
+        audioSourceDeath.volume = 0.2f;
     }
 
 
     // Update is called once per frame
     void Update()
     {
-        Thrust();
-        Rotate();
+        if (state == State.Transcending)    //changing level
+        {
+            rb.angularVelocity = Vector3.zero;  //less likely to die while scene is changing
+        }
+        else if (state == State.Alive)  //still playing
+        {            
+            RespondToThrustInput();
+            RespondToRotateInput();
+        }
+        else     //died
+        {
+            audioSourceEngine.Stop();
+        }
     }
 
 
     //Rocket thrust button
-    private void Thrust()
+    private void RespondToThrustInput()
     {
         if (Input.GetKey(KeyCode.Space))  //Boosting
         {
-            rb.AddRelativeForce(Vector3.up * mainThrust);
-            if (!audioSource.isPlaying) //So the audio doesn't layer itself
-            {
-                audioSource.volume = 1.0f;
-                audioSource.Play();
-            }
+            ApplyThrust();
         }
         else if (Input.GetKeyUp(KeyCode.Space))
         {
-            StartCoroutine(FadeAudioSource.StartFade(audioSource, 0.5f, 0.0f)); //Starts a coroutine to start volume fade as long as Space hasn't been presses for x amount of time otherwise the volume will reset and stop fading.
+            StartCoroutine(FadeAudioSource.StartFade(audioSourceEngine, 0.5f, 0.0f)); //Starts a coroutine to start volume fade as long as Space hasn't been presses for x amount of time otherwise the volume will reset and stop fading.
+        }
+    }
+
+    private void ApplyThrust()
+    {
+        rb.AddRelativeForce(Vector3.up * mainThrust);
+        if (!audioSourceEngine.isPlaying) //So the audio doesn't layer itself
+        {
+            audioSourceEngine.volume = 1.0f;
+            audioSourceEngine.Play();
         }
     }
 
 
     //Rocket movement buttons
-    private void Rotate()
+    private void RespondToRotateInput()
     {        
         float rotationThisFrame = rotationSpeed * Time.deltaTime;   //DeltaTime added to the rotation speed
 
@@ -80,20 +115,50 @@ public class Rocket : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (state != State.Alive) { return; }   //ignore collisions when dead
+
         switch (collision.gameObject.tag)
         {
             case "Friendly":
-                print("ok");
+                //do nothing
                 break;
-            default:
-                print("dead");
+            case "Finish":
+                StartSuccessSequence();
+                break;
+            default:                    //CHANGE THIS TO REDUCE THE HEALTH SLIDER
+                StartDeathSequence();
                 break;
         }
     }
 
+    private void StartSuccessSequence()
+    {
+        state = State.Transcending;
+        audioSourceSuccess.Play();
+        Invoke("LoadNextScene", 1f);
+    }
+
+    private void StartDeathSequence()
+    {
+        state = State.Dying;
+        audioSourceDeath.Play();
+        print(audioSourceDeath.clip.name);
+        Invoke("Dying", 1f);
+    }
+
+    private void Dying()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    private void LoadNextScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+    }
+
     //Stops the y rotation from changing on collisions (even though the rb rotation contraint has been set)
     private void OnCollisionStay(Collision collision)
-    {
+    {  
         float z = transform.eulerAngles.z;
         float x = transform.eulerAngles.x;        
         transform.rotation = Quaternion.Euler(x, 0, z);
