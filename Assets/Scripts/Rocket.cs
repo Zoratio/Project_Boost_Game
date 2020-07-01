@@ -8,16 +8,22 @@ public class Rocket : MonoBehaviour
 {
     bool right = false; //Movement condition to ensure there isn't a prioritised direction when both arrow (left & right) keys are down at once
     Rigidbody rb;
+
     AudioSource audioSourceEngine;
     AudioSource audioSourceSuccess;
     AudioSource audioSourceDeath;
 
 
     [SerializeField] float rotationSpeed = 250f; //Rotation speed (250f original)    
-    [SerializeField] float mainThrust = 10f; //Rotation speed (10f original) 
+    [SerializeField] float mainThrust = 10f; //Rotation speed (10f original)
+    
     [SerializeField] AudioClip mainEngine;
     [SerializeField] AudioClip success;
-    [SerializeField] AudioClip death; 
+    [SerializeField] AudioClip death;
+
+    [SerializeField] ParticleSystem mainEngineParticles;
+    [SerializeField] ParticleSystem successParticles;
+    [SerializeField] ParticleSystem deathParticles;
 
 
     enum State { Alive, Dying, Transcending }
@@ -45,6 +51,8 @@ public class Rocket : MonoBehaviour
         if (state == State.Transcending)    //changing level
         {
             rb.angularVelocity = Vector3.zero;  //less likely to die while scene is changing
+            audioSourceEngine.Stop();
+            mainEngineParticles.Stop();
         }
         else if (state == State.Alive)  //still playing
         {            
@@ -68,6 +76,10 @@ public class Rocket : MonoBehaviour
         else if (Input.GetKeyUp(KeyCode.Space))
         {
             StartCoroutine(FadeAudioSource.StartFade(audioSourceEngine, 0.5f, 0.0f)); //Starts a coroutine to start volume fade as long as Space hasn't been presses for x amount of time otherwise the volume will reset and stop fading.
+            if (mainEngineParticles.isPlaying)
+            {
+                mainEngineParticles.Stop();
+            }
         }
     }
 
@@ -78,6 +90,10 @@ public class Rocket : MonoBehaviour
         {
             audioSourceEngine.volume = 1.0f;
             audioSourceEngine.Play();
+        }
+        if (!mainEngineParticles.isPlaying)
+        {
+            mainEngineParticles.Play();
         }
     }
 
@@ -135,7 +151,8 @@ public class Rocket : MonoBehaviour
     {
         state = State.Transcending;
         audioSourceSuccess.Play();
-        Invoke("LoadNextScene", 1f);
+        successParticles.Play();
+        Invoke("LoadNextScene", 1f);        
     }
 
     private void StartDeathSequence()
@@ -144,6 +161,11 @@ public class Rocket : MonoBehaviour
         audioSourceDeath.Play();
         print(audioSourceDeath.clip.name);
         Invoke("Dying", 1f);
+        if (mainEngineParticles.isPlaying)
+        {
+            mainEngineParticles.Stop();
+        }
+        deathParticles.Play();
     }
 
     private void Dying()
