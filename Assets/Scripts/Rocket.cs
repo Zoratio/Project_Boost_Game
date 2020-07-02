@@ -159,7 +159,6 @@ public class Rocket : MonoBehaviour
     {
         state = State.Dying;
         audioSourceDeath.Play();
-        print(audioSourceDeath.clip.name);
         Invoke("Dying", 1f);
         if (mainEngineParticles.isPlaying)
         {
