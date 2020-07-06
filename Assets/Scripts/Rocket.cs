@@ -15,7 +15,7 @@ public class Rocket : MonoBehaviour
 
 
     [SerializeField] float rotationSpeed = 250f; //Rotation speed (250f original)    
-    [SerializeField] float mainThrust = 10f; //Rotation speed (10f original)
+    [SerializeField] float mainThrust = 1100f; //Rotation speed (1100f original)
     
     [SerializeField] AudioClip mainEngine;
     [SerializeField] AudioClip success;
@@ -45,8 +45,8 @@ public class Rocket : MonoBehaviour
     }
 
 
-    // Update is called once per frame
-    void Update()
+    // Ensures boosting is consistant
+    void FixedUpdate()     
     {
         if (state == State.Transcending)    //changing level
         {
@@ -65,27 +65,35 @@ public class Rocket : MonoBehaviour
         }
     }
 
+    // Need normal update to catch the keyup
+    private void Update()
+    {
+        if (state == State.Alive)
+        {
+            if (Input.GetKeyUp(KeyCode.Space))
+            {
+                StartCoroutine(FadeAudioSource.StartFade(audioSourceEngine, 0.2f, 0.0f)); //Starts a coroutine to start volume fade as long as Space hasn't been presses for x amount of time otherwise the volume will reset and stop fading.
+                if (mainEngineParticles.isPlaying)
+                {
+                    mainEngineParticles.Stop();
+                }
+            }
+        }        
+    }
 
-    //Rocket thrust button
+
+    // Rocket thrust button
     private void RespondToThrustInput()
     {
         if (Input.GetKey(KeyCode.Space))  //Boosting
         {
             ApplyThrust();
         }
-        else if (Input.GetKeyUp(KeyCode.Space))
-        {
-            StartCoroutine(FadeAudioSource.StartFade(audioSourceEngine, 0.5f, 0.0f)); //Starts a coroutine to start volume fade as long as Space hasn't been presses for x amount of time otherwise the volume will reset and stop fading.
-            if (mainEngineParticles.isPlaying)
-            {
-                mainEngineParticles.Stop();
-            }
-        }
     }
 
     private void ApplyThrust()
     {
-        rb.AddRelativeForce(Vector3.up * mainThrust);
+        rb.AddRelativeForce(Vector3.up * mainThrust * Time.deltaTime);
         if (!audioSourceEngine.isPlaying) //So the audio doesn't layer itself
         {
             audioSourceEngine.volume = 1.0f;
@@ -98,7 +106,7 @@ public class Rocket : MonoBehaviour
     }
 
 
-    //Rocket movement buttons
+    // Rocket movement buttons
     private void RespondToRotateInput()
     {        
         float rotationThisFrame = rotationSpeed * Time.deltaTime;   //DeltaTime added to the rotation speed

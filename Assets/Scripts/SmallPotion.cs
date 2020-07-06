@@ -7,6 +7,7 @@ public class SmallPotion : MonoBehaviour
 {
     bool small = false;
     float timer = 20f;
+    [SerializeField] Light sl;
     [SerializeField] GameObject rocket;
 
     float x;
@@ -39,8 +40,11 @@ public class SmallPotion : MonoBehaviour
     {
         transform.position = new Vector3(99, 99, 99);
         rocket.gameObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        sl.gameObject.transform.localPosition = new Vector3(0f, 0f, -8f);
         yield return new WaitForSeconds(10);
         rocket.gameObject.transform.localScale = new Vector3(1,1,1);
+        sl.gameObject.transform.localPosition = new Vector3(0f, 0f, -4.7f);
+
         transform.position = new Vector3(x, y, z);
     }
 }
