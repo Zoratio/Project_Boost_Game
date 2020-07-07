@@ -25,6 +25,7 @@ public class Rocket : MonoBehaviour
     [SerializeField] ParticleSystem successParticles;
     [SerializeField] ParticleSystem deathParticles;
 
+    public static float timer;
 
     enum State { Alive, Dying, Transcending }
     State state = State.Alive;
@@ -32,6 +33,8 @@ public class Rocket : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        timer = PlayerPrefs.GetFloat("Timer");
+
         rb = GetComponent<Rigidbody>();
         //--audio sources needed:
         audioSourceEngine = gameObject.AddComponent<AudioSource>();
@@ -68,6 +71,8 @@ public class Rocket : MonoBehaviour
     // Need normal update to catch the keyup
     private void Update()
     {
+        timer += Time.deltaTime;
+
         if (state == State.Alive)
         {
             if (Input.GetKeyUp(KeyCode.Space))
@@ -77,6 +82,10 @@ public class Rocket : MonoBehaviour
                 {
                     mainEngineParticles.Stop();
                 }
+            }
+            else if (PauseMenu.gameIsPaused)
+            {
+                audioSourceEngine.Stop();
             }
         }        
     }
@@ -177,11 +186,13 @@ public class Rocket : MonoBehaviour
 
     private void Dying()
     {
+        PlayerPrefs.SetFloat("Timer", timer);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     private void LoadNextScene()
     {
+        PlayerPrefs.SetFloat("Timer", timer);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 
