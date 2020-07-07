@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Rocket : MonoBehaviour
@@ -12,7 +9,6 @@ public class Rocket : MonoBehaviour
     AudioSource audioSourceEngine;
     AudioSource audioSourceSuccess;
     AudioSource audioSourceDeath;
-
 
     [SerializeField] float rotationSpeed = 250f; //Rotation speed (250f original)    
     [SerializeField] float mainThrust = 1100f; //Rotation speed (1100f original)
@@ -34,7 +30,6 @@ public class Rocket : MonoBehaviour
     void Start()
     {
         timer = PlayerPrefs.GetFloat("Timer");
-
         rb = GetComponent<Rigidbody>();
         //--audio sources needed:
         audioSourceEngine = gameObject.AddComponent<AudioSource>();
@@ -72,7 +67,6 @@ public class Rocket : MonoBehaviour
     private void Update()
     {
         timer += Time.deltaTime;
-
         if (state == State.Alive)
         {
             if (Input.GetKeyUp(KeyCode.Space))
@@ -119,7 +113,6 @@ public class Rocket : MonoBehaviour
     private void RespondToRotateInput()
     {        
         float rotationThisFrame = rotationSpeed * Time.deltaTime;   //DeltaTime added to the rotation speed
-
         if (Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.LeftArrow))    //Both right and left
         {
             rb.angularVelocity = Vector3.zero;  //Stops collision rotation 
@@ -149,7 +142,6 @@ public class Rocket : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         if (state != State.Alive) { return; }   //ignore collisions when dead
-
         switch (collision.gameObject.tag)
         {
             case "Friendly":

@@ -1,12 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class RockFall : MonoBehaviour
 {
     [SerializeField] GameObject rock; 
     bool triggered = false; 
-
 
     private void Update()
     {

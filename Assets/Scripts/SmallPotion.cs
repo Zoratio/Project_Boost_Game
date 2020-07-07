@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -28,18 +26,18 @@ public class SmallPotion : MonoBehaviour
         small = true;
         StartCoroutine(SmallState());
         StartCoroutine(CountDownText());
-
     }
 
     IEnumerator SmallState()
     {
         transform.position = new Vector3(99, 99, 99);
         rocket.gameObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-        sl.gameObject.transform.localPosition = new Vector3(0f, 0f, -8f);
+        sl.gameObject.transform.localPosition = new Vector3(0f, 0.1f, -8f);
+        sl.spotAngle = 20;
         yield return new WaitForSeconds(10);
         rocket.gameObject.transform.localScale = new Vector3(1,1,1);
-        sl.gameObject.transform.localPosition = new Vector3(0f, 0f, -4.7f);
-
+        sl.gameObject.transform.localPosition = new Vector3(0f, 0.1f, -4.7f);
+        sl.spotAngle = 30;
         transform.position = new Vector3(x, y, z);
     }
 

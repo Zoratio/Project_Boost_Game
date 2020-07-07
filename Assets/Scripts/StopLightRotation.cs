@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class StopLightRotation : MonoBehaviour
 {
@@ -10,14 +8,12 @@ public class StopLightRotation : MonoBehaviour
     void Start()
     {
         iniPos = transform.position;
-
         iniRot = transform.rotation;
     }
 
     void LateUpdate()
     {
         transform.position = iniPos;
-
         transform.rotation = iniRot;
     }
 }

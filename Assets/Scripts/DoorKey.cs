@@ -1,12 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class DoorKey : MonoBehaviour
 {
     [SerializeField] GameObject door;
     bool open = false;
-
 
     private void Update()
     {
