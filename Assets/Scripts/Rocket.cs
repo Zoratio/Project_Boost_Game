@@ -31,7 +31,6 @@ public class Rocket : MonoBehaviour
     {
         timer = PlayerPrefs.GetFloat("Timer");
         rb = GetComponent<Rigidbody>();
-        //--audio sources needed:
         audioSourceEngine = gameObject.AddComponent<AudioSource>();
         audioSourceEngine.clip = mainEngine;
         audioSourceSuccess = gameObject.AddComponent<AudioSource>();
